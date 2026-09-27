@@ -7,6 +7,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { TopHeader } from './components/layout/TopHeader';
 import { LeftSidebar } from './components/layout/LeftSidebar';
+import { LandingPageView } from './components/landing/LandingPageView';
 import { OverviewView } from './components/dashboard/OverviewView';
 import { RoutePlannerView } from './components/navigation/RoutePlannerView';
 import { ProcessingEngineView } from './components/engine/ProcessingEngineView';
@@ -74,6 +75,7 @@ function AppContent() {
       {/* 1. Top Header */}
       <TopHeader
         activeTab={activeTab}
+        onTabChange={setActiveTab}
         currentMission={currentMission}
         missions={missions}
         onSelectMission={(m) => setCurrentMission(m)}
@@ -114,6 +116,8 @@ function AppContent() {
 
         {/* View Switcher Container */}
         <main className="flex-1 flex flex-col overflow-hidden relative pb-12 lg:pb-0">
+          {activeTab === 'landing' && <LandingPageView />}
+
           {activeTab === 'overview' && (
             <OverviewView
               currentMission={currentMission}

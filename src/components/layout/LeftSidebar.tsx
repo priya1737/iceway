@@ -15,6 +15,7 @@ import {
   X,
   Menu,
   Cpu,
+  Globe,
 } from 'lucide-react';
 import { NavigationTab } from '../../types/navigation';
 
@@ -44,6 +45,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   onOpenMobile,
 }) => {
   const navItems = [
+    { id: 'landing' as NavigationTab, label: 'Portal Home', icon: Globe, badge: 'LANDING', badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' },
     { id: 'overview' as NavigationTab, label: 'Overview', icon: Compass, badge: null },
     { id: 'navigation' as NavigationTab, label: 'Navigation', icon: RouteIcon, badge: null },
     { id: 'engine' as NavigationTab, label: 'Processing Engine', icon: Cpu, badge: 'CORE', badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' },

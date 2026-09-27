@@ -11,11 +11,14 @@ import {
   CheckCircle2,
   Ship,
   Menu,
+  Globe,
+  ArrowRight,
 } from 'lucide-react';
 import { Mission, SimulationState, NavigationTab } from '../../types/navigation';
 
 interface TopHeaderProps {
   activeTab?: NavigationTab;
+  onTabChange?: (tab: NavigationTab) => void;
   currentMission: Mission;
   missions: Mission[];
   onSelectMission: (mission: Mission) => void;
@@ -30,6 +33,7 @@ interface TopHeaderProps {
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   activeTab = 'overview',
+  onTabChange,
   currentMission,
   missions,
   onSelectMission,
@@ -202,7 +206,27 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       </div>
 
       {/* Right: Simulation Toggle, Live Clock, Sync Status & Watch Officer */}
-      <div className="flex items-center gap-1.5 sm:gap-3">
+      <div className="flex items-center gap-1.5 sm:gap-2.5">
+        {/* Portal Home vs Bridge Console Switcher */}
+        {activeTab === 'landing' ? (
+          <button
+            onClick={() => onTabChange && onTabChange('overview')}
+            className="px-2.5 sm:px-3 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-[#071018] font-bold text-xs flex items-center gap-1.5 shadow transition cursor-pointer"
+          >
+            <span>Bridge Console</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <button
+            onClick={() => onTabChange && onTabChange('landing')}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0B1721] border border-[#1B2A35] hover:border-emerald-500/50 hover:bg-[#122230] text-xs text-[#91A4AE] hover:text-[#E8F0F3] transition cursor-pointer"
+            title="Go to Portal Landing Page"
+          >
+            <Globe className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-semibold text-[11px]">Portal Home</span>
+          </button>
+        )}
+
         {/* Simulation Mode Toggle Button */}
         <button
           onClick={onToggleSimulation}
