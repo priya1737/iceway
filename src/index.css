@@ -4,11 +4,42 @@
   :root {
     --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Default Accent: Polar Cyan */
+    --accent-color: #38bdf8;
+    --accent-rgb: 56, 189, 248;
+    --accent-glow: rgba(56, 189, 248, 0.25);
+    --accent-bg-subtle: rgba(56, 189, 248, 0.08);
+    --accent-border: rgba(56, 189, 248, 0.3);
+  }
+
+  [data-accent="emerald"] {
+    --accent-color: #34d399;
+    --accent-rgb: 52, 211, 153;
+    --accent-glow: rgba(52, 211, 153, 0.25);
+    --accent-bg-subtle: rgba(52, 211, 153, 0.08);
+    --accent-border: rgba(52, 211, 153, 0.3);
+  }
+
+  [data-accent="violet"] {
+    --accent-color: #a78bfa;
+    --accent-rgb: 167, 139, 250;
+    --accent-glow: rgba(167, 139, 250, 0.25);
+    --accent-bg-subtle: rgba(167, 139, 250, 0.08);
+    --accent-border: rgba(167, 139, 250, 0.3);
+  }
+
+  [data-accent="amber"] {
+    --accent-color: #fbbf24;
+    --accent-rgb: 251, 191, 36;
+    --accent-glow: rgba(251, 191, 36, 0.25);
+    --accent-bg-subtle: rgba(251, 191, 36, 0.08);
+    --accent-border: rgba(251, 191, 36, 0.3);
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #071018;
+    background-color: #060b11;
     color: #E8F0F3;
   }
 }
@@ -24,7 +55,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #071018;
+  background: #060b11;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -36,7 +67,27 @@
   background: #2a3f4e;
 }
 
-/* Subtle pulse for radar / vessel / active markers without glowing neon */
+/* Glassmorphism Luxury Utilities */
+.glass-panel {
+  background: rgba(11, 23, 33, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(16, 31, 46, 0.6) 0%, rgba(9, 18, 27, 0.75) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+}
+
+.glow-accent {
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+/* Subtle pulse for radar / vessel / active markers */
 @keyframes soft-pulse {
   0%, 100% {
     opacity: 1;
@@ -66,3 +117,20 @@
   transform-origin: center;
   animation: radar-sweep 12s linear infinite;
 }
+
+/* Skeleton loader shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+

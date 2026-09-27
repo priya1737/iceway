@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AntarcticMap } from '../map/AntarcticMap';
 import { MissionPanel } from './MissionPanel';
 import { EnvironmentStrip } from './EnvironmentStrip';
+import { CommandCenterFeed } from './CommandCenterFeed';
 import {
   Vessel,
   Iceberg,
@@ -12,7 +13,7 @@ import {
   WeatherOceanData,
   SeaIceData,
 } from '../../types/navigation';
-import { Compass, Ship, Waves, AlertTriangle, Layers, ArrowRight, RotateCw } from 'lucide-react';
+import { Compass, Ship, Waves, AlertTriangle, Layers, ArrowRight, RotateCw, Activity } from 'lucide-react';
 
 interface OverviewViewProps {
   currentMission: Mission;
@@ -58,7 +59,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onOpenVesselModal,
 }) => {
   // Mobile sub-tab view switcher
-  const [mobileTab, setMobileTab] = useState<'map' | 'mission' | 'conditions'>('map');
+  const [mobileTab, setMobileTab] = useState<'map' | 'mission' | 'conditions' | 'command'>('map');
 
   // Compute risk score based on whether simulation is at T+12 with un-recalculated iceberg encounter
   const isT12Hazard = simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated;
@@ -72,7 +73,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         <div className="flex items-center gap-1 w-full">
           <button
             onClick={() => setMobileTab('map')}
-            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+            className={`flex-1 py-1.5 px-1.5 rounded flex items-center justify-center gap-1 transition cursor-pointer font-semibold ${
               mobileTab === 'map'
                 ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
                 : 'text-[#91A4AE] hover:text-[#E8F0F3]'
@@ -84,7 +85,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
 
           <button
             onClick={() => setMobileTab('mission')}
-            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold relative ${
+            className={`flex-1 py-1.5 px-1.5 rounded flex items-center justify-center gap-1 transition cursor-pointer font-semibold relative ${
               mobileTab === 'mission'
                 ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
                 : 'text-[#91A4AE] hover:text-[#E8F0F3]'
@@ -98,15 +99,27 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </button>
 
           <button
+            onClick={() => setMobileTab('command')}
+            className={`flex-1 py-1.5 px-1.5 rounded flex items-center justify-center gap-1 transition cursor-pointer font-semibold ${
+              mobileTab === 'command'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Command</span>
+          </button>
+
+          <button
             onClick={() => setMobileTab('conditions')}
-            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+            className={`flex-1 py-1.5 px-1.5 rounded flex items-center justify-center gap-1 transition cursor-pointer font-semibold ${
               mobileTab === 'conditions'
                 ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
                 : 'text-[#91A4AE] hover:text-[#E8F0F3]'
             }`}
           >
             <Waves className="w-3.5 h-3.5" />
-            <span>Conditions</span>
+            <span>Meteo</span>
           </button>
         </div>
       </div>
@@ -217,6 +230,13 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             selectedIceberg={selectedIceberg}
           />
         </div>
+
+        {/* Mobile Command Center Sub-View (< lg only) */}
+        {mobileTab === 'command' && (
+          <div className="lg:hidden flex-1 overflow-y-auto p-3 space-y-3 bg-[#071018]">
+            <CommandCenterFeed />
+          </div>
+        )}
 
         {/* Mobile Conditions Sub-View (Mobile only) */}
         {mobileTab === 'conditions' && (

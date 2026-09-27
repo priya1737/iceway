@@ -3,31 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  NavigationTab,
-  Vessel,
-  Iceberg,
-  ResearchStation,
-  RouteOption,
-  Mission,
-  SimulationState,
-  SeaIceData,
-  WeatherOceanData,
-} from './types/navigation';
-import {
-  INITIAL_VESSEL,
-  RESEARCH_STATIONS,
-  INITIAL_ICEBERGS,
-  ROUTE_BALANCED,
-  ROUTE_FUEL_EFFICIENT,
-  ROUTE_SAFETY_PRIORITY,
-  ROUTE_RECALCULATED_AVOIDANCE,
-  INITIAL_SEA_ICE,
-  INITIAL_WEATHER_OCEAN,
-  MISSIONS_LIST,
-} from './data/mockAntarcticData';
-
+import React from 'react';
+import { AppProvider, useApp } from './context/AppContext';
 import { TopHeader } from './components/layout/TopHeader';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { OverviewView } from './components/dashboard/OverviewView';
@@ -42,168 +19,62 @@ import { RouteRecalculateModal } from './components/simulation/RouteRecalculateM
 import { VesselModal } from './components/dashboard/VesselModal';
 import { SystemStatusModal } from './components/modals/SystemStatusModal';
 import { SettingsModal } from './components/modals/SettingsModal';
+import { NewMissionModal } from './components/modals/NewMissionModal';
+import { RegisterIcebergModal } from './components/modals/RegisterIcebergModal';
+import { SensorCalibrationModal } from './components/modals/SensorCalibrationModal';
+import { DataExportModal } from './components/modals/DataExportModal';
+import { ToastContainer } from './components/common/ToastContainer';
+import { ConfirmationModal } from './components/common/ConfirmationModal';
 
-export default function App() {
-  // Navigation active tab
-  const [activeTab, setActiveTab] = useState<NavigationTab>('overview');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-
-  // Core Operational State
-  const [currentMission, setCurrentMission] = useState<Mission>(MISSIONS_LIST[0]);
-  const [vessel, setVessel] = useState<Vessel>(INITIAL_VESSEL);
-  const [icebergs, setIcebergs] = useState<Iceberg[]>(INITIAL_ICEBERGS);
-  const [stations] = useState<ResearchStation[]>(RESEARCH_STATIONS);
-  
-  // Routes State
-  const [availableRoutes, setAvailableRoutes] = useState<RouteOption[]>([
-    ROUTE_BALANCED,
-    ROUTE_FUEL_EFFICIENT,
-    ROUTE_SAFETY_PRIORITY,
-  ]);
-  const [activeRoute, setActiveRoute] = useState<RouteOption>(ROUTE_BALANCED);
-
-  // Environmental Data State
-  const [seaIce, setSeaIce] = useState<SeaIceData>(INITIAL_SEA_ICE);
-  const [weather] = useState<WeatherOceanData>(INITIAL_WEATHER_OCEAN);
-
-  // Inspection Selections
-  const [selectedIceberg, setSelectedIceberg] = useState<Iceberg | null>(null);
-  const [selectedStation, setSelectedStation] = useState<ResearchStation | null>(null);
-
-  // Modal Dialogs
-  const [vesselModalOpen, setVesselModalOpen] = useState<boolean>(false);
-  const [systemStatusOpen, setSystemStatusOpen] = useState<boolean>(false);
-  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
-  const [recalculateModalOpen, setRecalculateModalOpen] = useState<boolean>(false);
-
-  // Configurable Settings
-  const [safetyMarginNm, setSafetyMarginNm] = useState<number>(3.0);
-
-  // Simulation Mode State (T+00 to T+24)
-  const [simulation, setSimulation] = useState<SimulationState>({
-    active: false,
-    timeStep: 0,
-    isPlaying: false,
-    intersectionAlertDismissed: false,
-    routeRecalculated: false,
-    isRecalculating: false,
-    recalculationProgress: 0,
-    recalculationStepIndex: 0,
-  });
-
-  // Auto-advance simulation timer if isPlaying
-  useEffect(() => {
-    if (!simulation.active || !simulation.isPlaying) return;
-
-    const timer = setInterval(() => {
-      setSimulation((prev) => {
-        const nextSteps: (0 | 6 | 12 | 18 | 24)[] = [0, 6, 12, 18, 24];
-        const currentIndex = nextSteps.indexOf(prev.timeStep);
-        const nextIndex = (currentIndex + 1) % nextSteps.length;
-        const nextStep = nextSteps[nextIndex];
-
-        // Also sync sea ice concentration with forecast horizon
-        const matchedForecast = seaIce.forecast.find((f) => f.tHours === nextStep);
-        if (matchedForecast) {
-          setSeaIce((si) => ({ ...si, currentConcentrationPct: matchedForecast.concentrationPct }));
-        }
-
-        return { ...prev, timeStep: nextStep };
-      });
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [simulation.active, simulation.isPlaying, seaIce.forecast]);
-
-  // Toggle Simulation Mode
-  const handleToggleSimulation = () => {
-    setSimulation((prev) => {
-      const willBeActive = !prev.active;
-      return {
-        ...prev,
-        active: willBeActive,
-        timeStep: willBeActive ? 12 : 0, // Auto-jump to T+12 on first toggle to highlight the key decision scenario
-        isPlaying: false,
-      };
-    });
-  };
-
-  const handleSetSimulationStep = (step: 0 | 6 | 12 | 18 | 24) => {
-    setSimulation((prev) => ({ ...prev, timeStep: step }));
-    // Synchronize sea-ice concentration with forecast
-    const matchedForecast = seaIce.forecast.find((f) => f.tHours === step);
-    if (matchedForecast) {
-      setSeaIce((si) => ({ ...si, currentConcentrationPct: matchedForecast.concentrationPct }));
-    }
-  };
-
-  const handleResetSimulation = () => {
-    setSimulation({
-      active: true,
-      timeStep: 0,
-      isPlaying: false,
-      intersectionAlertDismissed: false,
-      routeRecalculated: false,
-      isRecalculating: false,
-      recalculationProgress: 0,
-      recalculationStepIndex: 0,
-    });
-    // Reset route back to original balanced route
-    setActiveRoute(ROUTE_BALANCED);
-    setAvailableRoutes([ROUTE_BALANCED, ROUTE_FUEL_EFFICIENT, ROUTE_SAFETY_PRIORITY]);
-    setSeaIce((si) => ({ ...si, currentConcentrationPct: 34 }));
-  };
-
-  // Trigger Recalculate Sequence
-  const handleRecalculateClick = () => {
-    setRecalculateModalOpen(true);
-  };
-
-  // Apply Recalculated Avoidance Corridor (Demo Flow Step 7 & 8)
-  const handleApplyRecalculatedRoute = () => {
-    // Add Avoidance Corridor to available routes and make it active
-    const updatedRoutes = [
-      ROUTE_RECALCULATED_AVOIDANCE,
-      ROUTE_BALANCED,
-      ROUTE_FUEL_EFFICIENT,
-      ROUTE_SAFETY_PRIORITY,
-    ];
-    setAvailableRoutes(updatedRoutes);
-    setActiveRoute(ROUTE_RECALCULATED_AVOIDANCE);
-
-    setSimulation((prev) => ({
-      ...prev,
-      routeRecalculated: true,
-    }));
-  };
-
-  // Switch mission
-  const handleSelectMission = (mission: Mission) => {
-    setCurrentMission(mission);
-    if (mission.id === 'mission-06') {
-      // Maitri route
-      setActiveRoute({
-        ...ROUTE_BALANCED,
-        name: 'ROUTE 06-M',
-        displayName: 'Route 06 — India Bay / Maitri Ingress',
-        distanceKm: 1240,
-        distanceNm: 669.5,
-        etaFormatted: 'Completed',
-        riskScore: 14,
-      });
-    } else {
-      setActiveRoute(ROUTE_BALANCED);
-    }
-  };
+function AppContent() {
+  const {
+    activeTab,
+    setActiveTab,
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    mobileMenuOpen,
+    setMobileMenuOpen,
+    missions,
+    currentMission,
+    setCurrentMission,
+    vessel,
+    icebergs,
+    selectedIceberg,
+    setSelectedIceberg,
+    stations,
+    selectedStation,
+    setSelectedStation,
+    availableRoutes,
+    activeRoute,
+    setActiveRoute,
+    seaIce,
+    setSeaIce,
+    weather,
+    simulation,
+    setSimulation,
+    handleToggleSimulation,
+    handleSetSimulationStep,
+    handleResetSimulation,
+    handleApplyRecalculatedRoute,
+    vesselModalOpen,
+    setVesselModalOpen,
+    systemStatusOpen,
+    setSystemStatusOpen,
+    settingsOpen,
+    setSettingsOpen,
+    recalculateModalOpen,
+    setRecalculateModalOpen,
+    settings,
+    updateSettings,
+  } = useApp();
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#071018] text-[#E8F0F3] select-none font-mono antialiased">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#060b11] text-[#E8F0F3] select-none font-mono antialiased">
       {/* 1. Top Header */}
       <TopHeader
         currentMission={currentMission}
-        missions={MISSIONS_LIST}
-        onSelectMission={handleSelectMission}
+        missions={missions}
+        onSelectMission={(m) => setCurrentMission(m)}
         simulation={simulation}
         onToggleSimulation={handleToggleSimulation}
         onSetSimulationStep={handleSetSimulationStep}
@@ -219,7 +90,7 @@ export default function App() {
         onStepChange={handleSetSimulationStep}
         onTogglePlay={() => setSimulation((prev) => ({ ...prev, isPlaying: !prev.isPlaying }))}
         onReset={handleResetSimulation}
-        onRecalculateClick={handleRecalculateClick}
+        onRecalculateClick={() => setRecalculateModalOpen(true)}
         onClose={() => setSimulation((prev) => ({ ...prev, active: false }))}
       />
 
@@ -257,7 +128,7 @@ export default function App() {
               seaIce={seaIce}
               weather={weather}
               onOpenRoutePlanner={() => setActiveTab('navigation')}
-              onRecalculateClick={handleRecalculateClick}
+              onRecalculateClick={() => setRecalculateModalOpen(true)}
               onOpenIcebergsTab={() => setActiveTab('icebergs')}
               onOpenWeatherTab={() => setActiveTab('weather')}
               onOpenSeaIceTab={() => setActiveTab('seaice')}
@@ -304,7 +175,7 @@ export default function App() {
               alternativeRoutes={availableRoutes.filter((r) => r.id !== activeRoute.id)}
               simulation={simulation}
               seaIceConcentrationPct={seaIce.currentConcentrationPct}
-              onRecalculateRoute={handleRecalculateClick}
+              onRecalculateRoute={() => setRecalculateModalOpen(true)}
               onNavigateToNavigationTab={() => setActiveTab('overview')}
             />
           )}
@@ -313,16 +184,7 @@ export default function App() {
             <WeatherOceanView weather={weather} vessel={vessel} />
           )}
 
-          {activeTab === 'missions' && (
-            <MissionsView
-              missions={MISSIONS_LIST}
-              currentMission={currentMission}
-              onSelectMission={(m) => {
-                handleSelectMission(m);
-                setActiveTab('overview');
-              }}
-            />
-          )}
+          {activeTab === 'missions' && <MissionsView />}
 
           {activeTab === 'reports' && (
             <ReportsView
@@ -337,7 +199,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* 4. Modals */}
+      {/* 4. Dynamic Modals & Drawers */}
       <VesselModal
         vessel={vessel}
         isOpen={vesselModalOpen}
@@ -352,8 +214,8 @@ export default function App() {
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        safetyMarginNm={safetyMarginNm}
-        onSetSafetyMargin={setSafetyMarginNm}
+        safetyMarginNm={settings.safetyMarginNm}
+        onSetSafetyMargin={(margin) => updateSettings({ safetyMarginNm: margin })}
       />
 
       <RouteRecalculateModal
@@ -361,6 +223,23 @@ export default function App() {
         onClose={() => setRecalculateModalOpen(false)}
         onApplyRecalculatedRoute={handleApplyRecalculatedRoute}
       />
+
+      <NewMissionModal />
+      <RegisterIcebergModal />
+      <SensorCalibrationModal />
+      <DataExportModal />
+
+      {/* 5. Feedback Systems: Toasts & Confirmation Dialogs */}
+      <ToastContainer />
+      <ConfirmationModal />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }
