@@ -77,6 +77,11 @@ export interface OperationalSettings {
   autoRecalculateOnHazard: boolean;
   polarClass: 'PC1' | 'PC2' | 'PC3' | 'PC4' | 'PC5' | 'PC6' | 'PC7';
   sarContrast: number;
+  securityToken?: string;
+  twoFactorAuth?: boolean;
+  sessionTimeoutMin?: number;
+  proximitySirenNm?: number;
+  iridiumWebhook?: string;
 }
 
 const DEFAULT_OFFICER_PROFILE: OfficerProfile = {
@@ -99,6 +104,11 @@ const DEFAULT_SETTINGS: OperationalSettings = {
   autoRecalculateOnHazard: true,
   polarClass: 'PC5',
   sarContrast: 85,
+  securityToken: 'SHA256:8892-F92B-01C8-ECDIS-AUTH-POLAR',
+  twoFactorAuth: true,
+  sessionTimeoutMin: 30,
+  proximitySirenNm: 2.5,
+  iridiumWebhook: 'https://telemetry.ncpor.gov.in/bridge/relay/v2',
 };
 
 const INITIAL_ACTIVITY_LOGS: ActivityLog[] = [

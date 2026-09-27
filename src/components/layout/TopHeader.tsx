@@ -12,9 +12,10 @@ import {
   Ship,
   Menu,
 } from 'lucide-react';
-import { Mission, SimulationState } from '../../types/navigation';
+import { Mission, SimulationState, NavigationTab } from '../../types/navigation';
 
 interface TopHeaderProps {
+  activeTab?: NavigationTab;
   currentMission: Mission;
   missions: Mission[];
   onSelectMission: (mission: Mission) => void;
@@ -28,6 +29,7 @@ interface TopHeaderProps {
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
+  activeTab = 'overview',
   currentMission,
   missions,
   onSelectMission,
@@ -114,6 +116,29 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             <span className="text-[#91A4AE] ml-1.5">12.4 kn · PC 5</span>
           </div>
         </button>
+
+        {/* Sector & Subsystem Breadcrumb */}
+        <div className="hidden 2xl:flex items-center gap-1.5 text-[10px] text-[#60737E] font-mono bg-[#0B1721] px-2.5 py-1 rounded border border-[#1B2A35]">
+          <span className="text-[#91A4AE]">PRYDZ BAY</span>
+          <span>/</span>
+          <span className="text-cyan-400 font-bold uppercase">
+            {activeTab === 'overview'
+              ? 'Bridge Overview'
+              : activeTab === 'navigation'
+              ? 'Route Planner'
+              : activeTab === 'engine'
+              ? 'Processing Engine'
+              : activeTab === 'seaice'
+              ? 'Sea Ice Dynamics'
+              : activeTab === 'icebergs'
+              ? 'Iceberg Tracking'
+              : activeTab === 'weather'
+              ? 'Meteo & Ocean'
+              : activeTab === 'missions'
+              ? 'Expedition Registry'
+              : 'IMO Compliance'}
+          </span>
+        </div>
       </div>
 
       {/* Center: Mission Selector */}

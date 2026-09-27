@@ -9,6 +9,7 @@ import { TopHeader } from './components/layout/TopHeader';
 import { LeftSidebar } from './components/layout/LeftSidebar';
 import { OverviewView } from './components/dashboard/OverviewView';
 import { RoutePlannerView } from './components/navigation/RoutePlannerView';
+import { ProcessingEngineView } from './components/engine/ProcessingEngineView';
 import { SeaIceView } from './components/seaice/SeaIceView';
 import { IcebergsView } from './components/icebergs/IcebergsView';
 import { WeatherOceanView } from './components/weather/WeatherOceanView';
@@ -72,6 +73,7 @@ function AppContent() {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#060b11] text-[#E8F0F3] select-none font-mono antialiased">
       {/* 1. Top Header */}
       <TopHeader
+        activeTab={activeTab}
         currentMission={currentMission}
         missions={missions}
         onSelectMission={(m) => setCurrentMission(m)}
@@ -148,6 +150,8 @@ function AppContent() {
               seaIceConcentrationPct={seaIce.currentConcentrationPct}
             />
           )}
+
+          {activeTab === 'engine' && <ProcessingEngineView />}
 
           {activeTab === 'seaice' && (
             <SeaIceView

@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   X,
   Menu,
+  Cpu,
 } from 'lucide-react';
 import { NavigationTab } from '../../types/navigation';
 
@@ -45,6 +46,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   const navItems = [
     { id: 'overview' as NavigationTab, label: 'Overview', icon: Compass, badge: null },
     { id: 'navigation' as NavigationTab, label: 'Navigation', icon: RouteIcon, badge: null },
+    { id: 'engine' as NavigationTab, label: 'Processing Engine', icon: Cpu, badge: 'CORE', badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' },
     { id: 'seaice' as NavigationTab, label: 'Sea Ice', icon: Layers, badge: '34%' },
     { id: 'icebergs' as NavigationTab, label: 'Icebergs', icon: Mountain, badge: icebergAlertCount > 0 ? `${icebergAlertCount}` : null, badgeColor: 'bg-[#E05B5B]' },
     { id: 'weather' as NavigationTab, label: 'Weather & Ocean', icon: Waves, badge: null },

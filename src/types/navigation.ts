@@ -1,6 +1,7 @@
 export type NavigationTab = 
   | 'overview' 
   | 'navigation' 
+  | 'engine'
   | 'seaice' 
   | 'icebergs' 
   | 'weather' 
@@ -212,4 +213,49 @@ export interface SimulationState {
   isRecalculating: boolean;
   recalculationProgress: number; // 0 to 100
   recalculationStepIndex: number;
+}
+
+export type PipelineStatus = 'idle' | 'running' | 'paused' | 'completed' | 'failed' | 'aborted';
+
+export interface PipelineStep {
+  id: string;
+  name: string;
+  subsystem: string;
+  description: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  progress: number;
+  durationMs: number;
+  outputMetric?: string;
+}
+
+export interface PipelineParameter {
+  key: string;
+  label: string;
+  value: number | string | boolean;
+  type: 'number' | 'slider' | 'select' | 'boolean';
+  options?: string[];
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  description?: string;
+}
+
+export interface EnginePipeline {
+  id: string;
+  name: string;
+  category: 'ROUTING' | 'SAR_INGESTION' | 'POLARIS_RISK' | 'TELEMETRY' | 'CUSTOM';
+  badge: string;
+  description: string;
+  estimatedRuntimeSec: number;
+  parameters: PipelineParameter[];
+  steps: PipelineStep[];
+}
+
+export interface EngineLogEntry {
+  id: string;
+  timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR' | 'SUCCESS' | 'HEX';
+  tag: string;
+  message: string;
 }
