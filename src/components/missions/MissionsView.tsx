@@ -34,8 +34,71 @@ export const MissionsView: React.FC<MissionsViewProps> = ({
         </div>
       </div>
 
-      {/* Missions Table */}
-      <div className="rounded-lg bg-[#0B1721] border border-[#1B2A35] overflow-hidden">
+      {/* Mobile Mission Cards (< md) */}
+      <div className="md:hidden space-y-3">
+        {missions.map((m) => {
+          const isActive = m.id === currentMission.id;
+          return (
+            <div
+              key={m.id}
+              onClick={() => onSelectMission(m)}
+              className={`p-3.5 rounded-lg border transition cursor-pointer ${
+                isActive
+                  ? 'bg-[#152535]/80 border-[#5DADE2]'
+                  : 'bg-[#0B1721] border-[#1B2A35] hover:border-[#5DADE2]/40'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-[#E8F0F3]">{m.missionNumber}</span>
+                  {isActive && (
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#5DADE2] text-[#071018] font-bold">
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase border ${
+                    m.status === 'Active'
+                      ? 'bg-[#43C98B]/10 text-[#43C98B] border-[#43C98B]/30'
+                      : m.status === 'Planned'
+                      ? 'bg-[#E5B84B]/10 text-[#E5B84B] border-[#E5B84B]/30'
+                      : 'bg-[#60737E]/10 text-[#91A4AE] border-[#1B2A35]'
+                  }`}
+                >
+                  {m.status}
+                </span>
+              </div>
+
+              <div className="text-xs font-semibold text-[#5DADE2] mb-1">{m.destinationName}</div>
+              <p className="text-[11px] text-[#91A4AE] mb-3 leading-snug">{m.objective}</p>
+
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-[#91A4AE] pt-2 border-t border-[#1B2A35]">
+                <div>
+                  <span className="text-[#60737E] block uppercase">Vessel:</span>
+                  <span className="text-[#E8F0F3] font-semibold">{m.vesselName}</span>
+                </div>
+                <div>
+                  <span className="text-[#60737E] block uppercase">ETA:</span>
+                  <span className="text-[#E8F0F3] font-semibold">{m.etaFormatted}</span>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className="text-[10px] text-[#E5B84B] font-bold uppercase">
+                  Risk: {m.riskLevel}
+                </span>
+                <span className="text-[11px] text-[#5DADE2] flex items-center gap-1 font-bold">
+                  {isActive ? 'Current Mission' : 'Select Mission'} →
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Missions Table (md+) */}
+      <div className="hidden md:block rounded-lg bg-[#0B1721] border border-[#1B2A35] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>

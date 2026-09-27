@@ -47,6 +47,7 @@ export default function App() {
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<NavigationTab>('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   // Core Operational State
   const [currentMission, setCurrentMission] = useState<Mission>(MISSIONS_LIST[0]);
@@ -209,6 +210,7 @@ export default function App() {
         onResetSimulation={handleResetSimulation}
         onOpenVesselModal={() => setVesselModalOpen(true)}
         onOpenSystemStatus={() => setSystemStatusOpen(true)}
+        onToggleMobileMenu={() => setMobileMenuOpen(true)}
       />
 
       {/* 2. Simulation Floating Control Bar (when simulation is active) */}
@@ -232,10 +234,13 @@ export default function App() {
           onOpenSystemStatus={() => setSystemStatusOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
           icebergAlertCount={simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated ? 1 : 0}
+          mobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
+          onOpenMobile={() => setMobileMenuOpen(true)}
         />
 
         {/* View Switcher Container */}
-        <main className="flex-1 flex flex-col overflow-hidden relative">
+        <main className="flex-1 flex flex-col overflow-hidden relative pb-12 lg:pb-0">
           {activeTab === 'overview' && (
             <OverviewView
               currentMission={currentMission}

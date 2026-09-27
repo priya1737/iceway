@@ -196,7 +196,9 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
     }
   };
 
-  // Mouse drag pan handlers
+  // Mouse & Touch drag pan handlers
+  const [touchPinchDist, setTouchPinchDist] = useState<number | null>(null);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only left click
     setIsDragging(true);
@@ -227,6 +229,56 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
   };
 
   const handleMouseUp = () => setIsDragging(false);
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+      setTouchPinchDist(null);
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setTouchPinchDist(dist);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDragging) {
+      const touch = e.touches[0];
+      setPan({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y,
+      });
+
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientX = touch.clientX - rect.left;
+        const clientY = touch.clientY - rect.top;
+        const svgX = (clientX - rect.width / 2 - pan.x) / zoom + BASE_MAP_WIDTH / 2;
+        const svgY = (clientY - rect.height / 2 - pan.y) / zoom + BASE_MAP_HEIGHT / 2;
+        const geo = inverseProject(svgX, svgY);
+        setCursorGeo(geo);
+      }
+    } else if (e.touches.length === 2 && touchPinchDist !== null) {
+      const currentDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const ratio = currentDist / touchPinchDist;
+      setZoom((z) => Math.min(3.8, Math.max(0.6, z * ratio)));
+      setTouchPinchDist(currentDist);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setTouchPinchDist(null);
+  };
 
   // Wheel zoom with focal point
   const handleWheel = (e: React.WheelEvent) => {
@@ -301,7 +353,11 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-      className={`relative overflow-hidden bg-[#050B11] cursor-${isDragging ? 'grabbing' : 'grab'} select-none ${customClass}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+      className={`relative overflow-hidden bg-[#050B11] cursor-${isDragging ? 'grabbing' : 'grab'} select-none touch-none ${customClass}`}
     >
       {/* Map Control Buttons */}
       <MapControls
@@ -318,61 +374,61 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
       <LayerControl layers={layers} onToggleLayer={handleToggleLayer} />
 
       {/* Navigation Condition Legend */}
-      <div className="absolute bottom-4 left-4 z-20 bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-3 py-2 shadow-lg text-[11px] font-mono pointer-events-auto">
-        <div className="text-[10px] text-[#91A4AE] uppercase tracking-wider mb-1 font-semibold flex items-center gap-1.5">
-          <span>NAVIGATION CONDITIONS</span>
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20 bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-2.5 py-1.5 sm:px-3 sm:py-2 shadow-lg text-[10px] sm:text-[11px] font-mono pointer-events-auto">
+        <div className="text-[9px] sm:text-[10px] text-[#91A4AE] uppercase tracking-wider mb-1 font-semibold flex items-center gap-1.5">
+          <span>CONDITIONS</span>
           {simulation.active && (
-            <span className="text-[9px] px-1 rounded bg-[#E5B84B]/20 text-[#E5B84B]">
+            <span className="text-[8px] sm:text-[9px] px-1 rounded bg-[#E5B84B]/20 text-[#E5B84B]">
               T+{simulation.timeStep}h
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#43C98B]" />
-            <span className="text-[#E8F0F3]">LOW</span>
+        <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-1">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#43C98B]" />
+            <span className="text-[#E8F0F3] text-[9px] sm:text-[11px]">LOW</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E5B84B]" />
-            <span className="text-[#E8F0F3]">CAUTION</span>
+          <div className="flex items-center gap-1">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#E5B84B]" />
+            <span className="text-[#E8F0F3] text-[9px] sm:text-[11px]">CAUT</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E05B5B]" />
-            <span className="text-[#E8F0F3]">HIGH</span>
+          <div className="flex items-center gap-1">
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#E05B5B]" />
+            <span className="text-[#E8F0F3] text-[9px] sm:text-[11px]">HIGH</span>
           </div>
         </div>
       </div>
 
       {/* Compass Indicator & True South Pole orientation */}
-      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-1.5 font-mono pointer-events-none select-none">
-        {/* Scale & Coordinate HUD */}
-        <div className="bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-2.5 py-1 text-[10px] text-[#91A4AE] flex items-center gap-3 shadow-lg">
-          <div className="flex items-center gap-1.5">
+      <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-20 flex flex-col items-end gap-1.5 font-mono pointer-events-none select-none">
+        {/* Scale & Coordinate HUD (Compact on mobile) */}
+        <div className="bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] text-[#91A4AE] flex items-center gap-2 sm:gap-3 shadow-lg">
+          <div className="hidden sm:flex items-center gap-1.5">
             <div className="w-16 h-1 bg-[#5DADE2] relative">
               <span className="absolute -top-3 left-0 text-[9px] text-[#60737E]">0</span>
               <span className="absolute -top-3 right-0 text-[9px] text-[#60737E]">100 NM</span>
             </div>
             <span className="text-[9px] text-[#60737E]">/ 185 km</span>
           </div>
-          <div className="h-3 w-px bg-[#1B2A35]" />
+          <div className="hidden sm:block h-3 w-px bg-[#1B2A35]" />
           <div>
             {cursorGeo ? (
               <span className="text-[#E8F0F3]">
                 {formatLatitude(cursorGeo.lat)}, {formatLongitude(cursorGeo.lon)}
               </span>
             ) : (
-              <span>64°49.2'S, 62°54.6'E</span>
+              <span>64°49'S, 62°54'E</span>
             )}
           </div>
         </div>
 
         {/* Polar North Compass Indicator */}
-        <div className="bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded-full w-9 h-9 flex items-center justify-center relative shadow-lg">
-          <div className="w-5 h-5 relative flex items-center justify-center">
+        <div className="bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center relative shadow-lg">
+          <div className="w-4 h-4 sm:w-5 sm:h-5 relative flex items-center justify-center">
             {/* North pointing needle toward top-left according to polar rotation */}
-            <div className="w-1 h-3.5 bg-[#E05B5B] rounded-t origin-bottom transform -rotate-45 mb-1.5" />
-            <div className="w-1 h-3.5 bg-[#91A4AE] rounded-b origin-top transform -rotate-45 mt-1.5" />
-            <span className="absolute -top-1 text-[8px] font-bold text-[#E05B5B]">N</span>
+            <div className="w-0.5 sm:w-1 h-2.5 sm:h-3.5 bg-[#E05B5B] rounded-t origin-bottom transform -rotate-45 mb-1" />
+            <div className="w-0.5 sm:w-1 h-2.5 sm:h-3.5 bg-[#91A4AE] rounded-b origin-top transform -rotate-45 mt-1" />
+            <span className="absolute -top-1 text-[7px] sm:text-[8px] font-bold text-[#E05B5B]">N</span>
           </div>
         </div>
       </div>

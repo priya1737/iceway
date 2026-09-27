@@ -41,18 +41,18 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto select-none bg-[#071018] p-4 lg:p-8 font-mono space-y-6">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto select-none bg-[#071018] p-3 sm:p-4 lg:p-8 font-mono space-y-4 sm:space-y-6">
       {/* Top Header & Export Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1B2A35]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-[#1B2A35]">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2] shrink-0">
             <FileText className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-[#E8F0F3]">
+            <h1 className="text-sm sm:text-base font-bold text-[#E8F0F3] leading-none">
               MISSION DISPATCH & NAVIGATION REPORT
             </h1>
-            <p className="text-[11px] text-[#91A4AE]">
+            <p className="text-[10px] sm:text-[11px] text-[#91A4AE] mt-0.5 truncate max-w-[280px] sm:max-w-none">
               IMO Polar Water Operational Manual (PWOM) Compliant Voyage Record
             </p>
           </div>
@@ -61,7 +61,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={handleExport}
-            className="py-1.5 px-3 rounded bg-[#5DADE2] hover:bg-[#4999c7] text-[#071018] font-bold text-xs uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow"
+            className="w-full sm:w-auto py-1.5 px-3 rounded bg-[#5DADE2] hover:bg-[#4999c7] text-[#071018] font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer shadow"
           >
             <Download className="w-3.5 h-3.5" />
             EXPORT REPORT
@@ -77,21 +77,21 @@ export const ReportsView: React.FC<ReportsViewProps> = ({
       )}
 
       {/* Official Polar Report Document Container */}
-      <div className="bg-[#0B1721] border border-[#1B2A35] rounded-lg p-6 space-y-6 max-w-5xl shadow-xl">
+      <div className="bg-[#0B1721] border border-[#1B2A35] rounded-lg p-3.5 sm:p-6 space-y-4 sm:space-y-6 max-w-5xl shadow-xl">
         {/* Document Header */}
-        <div className="flex justify-between items-start border-b border-[#1B2A35] pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start border-b border-[#1B2A35] pb-4 gap-2">
           <div>
-            <span className="text-[10px] text-[#60737E] uppercase tracking-widest block">
+            <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase tracking-widest block">
               NATIONAL CENTRE FOR POLAR AND OCEAN RESEARCH (GOVT. OF INDIA)
             </span>
-            <h2 className="text-lg font-bold text-[#E8F0F3] mt-1">
+            <h2 className="text-base sm:text-lg font-bold text-[#E8F0F3] mt-1">
               ANTARCTIC VOYAGE OPERATIONS SUMMARY: {mission.missionNumber}
             </h2>
             <div className="text-xs text-[#5DADE2] mt-0.5">
               Sector: Prydz Bay / Larsemann Hills · Destination: {mission.destinationName}
             </div>
           </div>
-          <div className="text-right text-xs text-[#91A4AE]">
+          <div className="sm:text-right text-xs text-[#91A4AE]">
             <div>Ref: ISEA-45/SAGAR/NAV-07</div>
             <div>Date: 2026-09-27</div>
             <div className="text-[#43C98B] font-semibold mt-0.5">STATUS: ON WATCH</div>

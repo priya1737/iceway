@@ -47,6 +47,7 @@ export const RoutePlannerView: React.FC<RoutePlannerViewProps> = ({
   const [priority, setPriority] = useState<'BALANCED' | 'FUEL_EFFICIENT' | 'SAFETY_PRIORITY'>('BALANCED');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generationNotice, setGenerationNotice] = useState<string | null>(null);
+  const [mobileTab, setMobileTab] = useState<'plan' | 'map'>('plan');
 
   const handleGenerateRoutes = () => {
     setIsGenerating(true);
@@ -63,9 +64,42 @@ export const RoutePlannerView: React.FC<RoutePlannerViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row h-full overflow-hidden select-none bg-[#071018]">
+    <div className="flex-1 flex flex-col xl:flex-row h-full overflow-hidden select-none bg-[#071018] font-mono">
+      {/* Mobile Tab Switcher (< xl screens) */}
+      <div className="xl:hidden flex items-center justify-between p-1.5 bg-[#0B1721] border-b border-[#1B2A35] shrink-0 text-xs">
+        <div className="flex items-center gap-1 w-full">
+          <button
+            onClick={() => setMobileTab('plan')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'plan'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Parameters & Routes</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('map')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'map'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Map Preview</span>
+          </button>
+        </div>
+      </div>
+
       {/* Left Planning & Comparison Column */}
-      <div className="w-full xl:w-[480px] border-r border-[#1B2A35] flex flex-col h-full bg-[#071018] overflow-y-auto shrink-0 font-mono">
+      <div
+        className={`w-full xl:w-[480px] border-r border-[#1B2A35] flex flex-col h-full bg-[#071018] overflow-y-auto shrink-0 ${
+          mobileTab === 'plan' ? 'flex' : 'hidden xl:flex'
+        }`}
+      >
         {/* Header */}
         <div className="p-4 border-b border-[#1B2A35] bg-[#0B1721]/60">
           <div className="flex items-center gap-2">
@@ -290,10 +324,25 @@ export const RoutePlannerView: React.FC<RoutePlannerViewProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Mobile Action to Jump to Map */}
+        <div className="xl:hidden p-3 bg-[#0B1721] border-t border-[#1B2A35]">
+          <button
+            onClick={() => setMobileTab('map')}
+            className="w-full py-2.5 px-3 rounded bg-[#5DADE2] hover:bg-[#4999c7] text-[#071018] font-bold text-xs uppercase flex items-center justify-center gap-2 cursor-pointer shadow transition"
+          >
+            <Compass className="w-4 h-4" />
+            <span>Inspect Route on Polar Map</span>
+          </button>
+        </div>
       </div>
 
       {/* Right Column: Visual Polar Route Map */}
-      <div className="flex-1 h-full relative">
+      <div
+        className={`flex-1 h-full relative ${
+          mobileTab === 'map' ? 'block' : 'hidden xl:block'
+        }`}
+      >
         <AntarcticMap
           vessel={vessel}
           icebergs={icebergs}
@@ -310,8 +359,22 @@ export const RoutePlannerView: React.FC<RoutePlannerViewProps> = ({
           customClass="h-full w-full"
         />
 
-        {/* Floating Route Summary Overlay */}
-        <div className="absolute top-4 left-60 z-10 bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-3 py-1.5 font-mono text-xs shadow-lg hidden md:block">
+        {/* Mobile Top Route Pill */}
+        <div className="absolute top-2 left-2 right-16 sm:left-4 z-10 bg-[#0B1721]/95 backdrop-blur-md border border-[#1B2A35] rounded px-2.5 py-1.5 font-mono text-[11px] shadow-lg xl:hidden flex items-center justify-between">
+          <div className="truncate">
+            <span className="text-[#43C98B] font-bold">{activeRoute.name}</span>
+            <span className="text-[#91A4AE] ml-1.5">{activeRoute.distanceKm} km · {activeRoute.etaFormatted}</span>
+          </div>
+          <button
+            onClick={() => setMobileTab('plan')}
+            className="text-[10px] text-[#5DADE2] hover:underline font-semibold ml-2 shrink-0 cursor-pointer"
+          >
+            Options →
+          </button>
+        </div>
+
+        {/* Floating Route Summary Overlay (Desktop) */}
+        <div className="absolute top-4 left-60 z-10 bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-3 py-1.5 font-mono text-xs shadow-lg hidden xl:block">
           <span className="text-[#60737E]">SELECTED: </span>
           <span className="text-[#43C98B] font-bold">{activeRoute.displayName}</span>
           <span className="text-[#91A4AE] ml-2">

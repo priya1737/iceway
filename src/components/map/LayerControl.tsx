@@ -8,7 +8,12 @@ interface LayerControlProps {
 }
 
 export const LayerControl: React.FC<LayerControlProps> = ({ layers, onToggleLayer }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
 
   const layerItems: { key: keyof MapLayerState; label: string; color: string; desc?: string }[] = [
     { key: 'seaIce', label: 'Sea Ice', color: '#A0D2EB', desc: 'Concentration contours' },
@@ -22,8 +27,8 @@ export const LayerControl: React.FC<LayerControlProps> = ({ layers, onToggleLaye
   ];
 
   return (
-    <div className="absolute top-4 left-4 z-20 select-none">
-      <div className="bg-[#0B1721]/95 backdrop-blur-md border border-[#1B2A35] rounded shadow-xl w-52 overflow-hidden transition-all">
+    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 select-none">
+      <div className="bg-[#0B1721]/95 backdrop-blur-md border border-[#1B2A35] rounded shadow-xl w-44 sm:w-52 overflow-hidden transition-all">
         {/* Header */}
         <button
           onClick={() => setIsOpen(!isOpen)}

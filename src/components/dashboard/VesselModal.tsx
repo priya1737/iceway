@@ -13,8 +13,8 @@ export const VesselModal: React.FC<VesselModalProps> = ({ vessel, isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 select-none">
-      <div className="bg-[#0B1721] border border-[#1B2A35] rounded-lg shadow-2xl w-full max-w-md overflow-hidden font-mono">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-4 select-none">
+      <div className="bg-[#0B1721] border border-[#1B2A35] rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto font-mono">
         {/* Header */}
         <div className="px-4 py-3 border-b border-[#1B2A35] flex items-center justify-between bg-[#071018]">
           <div className="flex items-center gap-2.5">

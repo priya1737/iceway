@@ -41,6 +41,7 @@ export const SeaIceView: React.FC<SeaIceViewProps> = ({
   onSetSeaIceConcentration,
 }) => {
   const [selectedForecastIndex, setSelectedForecastIndex] = useState<number>(0);
+  const [mobileTab, setMobileTab] = useState<'forecast' | 'map'>('forecast');
 
   const forecast = seaIce.forecast;
   const currentPoint = forecast[selectedForecastIndex] || forecast[0];
@@ -53,31 +54,31 @@ export const SeaIceView: React.FC<SeaIceViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden select-none bg-[#071018] font-mono">
       {/* Top Forecast Timeline Header */}
-      <div className="h-14 border-b border-[#1B2A35] bg-[#0B1721] px-4 flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2]">
+      <div className="h-auto min-h-14 py-2 border-b border-[#1B2A35] bg-[#0B1721] px-3 sm:px-4 flex flex-col md:flex-row md:items-center justify-between gap-2.5 z-20 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2] shrink-0">
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-[#E8F0F3] leading-none">
+            <h1 className="text-xs sm:text-sm font-bold text-[#E8F0F3] leading-none">
               SEA-ICE CONDITIONS & FORECAST
             </h1>
-            <p className="text-[10px] text-[#91A4AE] mt-0.5">
+            <p className="text-[9px] sm:text-[10px] text-[#91A4AE] mt-0.5 truncate max-w-[280px] sm:max-w-none">
               SAR Backscatter Analysis · Dynamic concentration tracking along Prydz Bay fairway
             </p>
           </div>
         </div>
 
         {/* Timeline Buttons: NOW, +6H, +12H, +24H, +48H */}
-        <div className="flex items-center gap-1.5 p-1 bg-[#071018] border border-[#1B2A35] rounded-md">
-          <span className="text-[10px] text-[#60737E] uppercase px-2">FORECAST HORIZON:</span>
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#071018] border border-[#1B2A35] rounded-md overflow-x-auto max-w-full">
+          <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase px-1.5 shrink-0 hidden xs:inline">HORIZON:</span>
           {forecast.map((pt, idx) => {
             const isSelected = selectedForecastIndex === idx;
             return (
               <button
                 key={pt.timeLabel}
                 onClick={() => handleSelectTime(idx)}
-                className={`px-3 py-1 rounded text-xs transition cursor-pointer font-bold ${
+                className={`px-2 sm:px-3 py-1 rounded text-[11px] sm:text-xs transition cursor-pointer font-bold shrink-0 ${
                   isSelected
                     ? 'bg-[#5DADE2] text-[#071018] shadow'
                     : 'text-[#91A4AE] hover:text-[#E8F0F3] hover:bg-[#152535]'
@@ -90,16 +91,48 @@ export const SeaIceView: React.FC<SeaIceViewProps> = ({
         </div>
 
         {/* Satellite Sync Badge */}
-        <div className="hidden lg:flex items-center gap-2 text-xs text-[#91A4AE]">
+        <div className="hidden xl:flex items-center gap-2 text-xs text-[#91A4AE]">
           <Radio className="w-3.5 h-3.5 text-[#43C98B]" />
           <span>Sentinel-1B EW · 14:15 UTC</span>
+        </div>
+      </div>
+
+      {/* Mobile Tab Switcher (< lg screens) */}
+      <div className="lg:hidden flex items-center justify-between p-1.5 bg-[#0B1721] border-b border-[#1B2A35] shrink-0 text-xs">
+        <div className="flex items-center gap-1 w-full">
+          <button
+            onClick={() => setMobileTab('forecast')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'forecast'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Concentration & Types</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('map')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'map'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <span>Polar Ice Map</span>
+          </button>
         </div>
       </div>
 
       {/* Main Workspace: Side Panel + Map */}
       <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden">
         {/* Left Side Panel */}
-        <div className="w-full lg:w-84 border-r border-[#1B2A35] bg-[#071018] flex flex-col h-full overflow-y-auto shrink-0 text-xs">
+        <div
+          className={`w-full lg:w-84 border-r border-[#1B2A35] bg-[#071018] flex flex-col h-full overflow-y-auto shrink-0 text-xs ${
+            mobileTab === 'forecast' ? 'flex' : 'hidden lg:flex'
+          }`}
+        >
           {/* Section: Sea-Ice Concentration Progression */}
           <div className="p-4 border-b border-[#1B2A35] bg-[#0B1721]/50">
             <span className="text-[10px] text-[#60737E] uppercase tracking-wider block font-semibold mb-2">
@@ -222,7 +255,11 @@ export const SeaIceView: React.FC<SeaIceViewProps> = ({
         </div>
 
         {/* Right Map View synced with selected forecast */}
-        <div className="flex-1 h-full relative">
+        <div
+          className={`flex-1 h-full relative ${
+            mobileTab === 'map' ? 'block' : 'hidden lg:block'
+          }`}
+        >
           <AntarcticMap
             vessel={vessel}
             icebergs={icebergs}

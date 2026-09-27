@@ -48,6 +48,7 @@ export const IcebergsView: React.FC<IcebergsViewProps> = ({
   onNavigateToNavigationTab,
 }) => {
   const [filter, setFilter] = useState<'ALL' | 'HIGH_RISK' | 'PROXIMITY'>('ALL');
+  const [mobileTab, setMobileTab] = useState<'targets' | 'map'>('targets');
 
   // Filter list
   const filteredIcebergs = icebergs.filter((berg) => {
@@ -63,55 +64,87 @@ export const IcebergsView: React.FC<IcebergsViewProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden select-none bg-[#071018] font-mono">
       {/* Top Header Statistics Strip */}
-      <div className="h-14 border-b border-[#1B2A35] bg-[#0B1721] px-4 flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#E05B5B]">
+      <div className="h-auto min-h-14 py-2 border-b border-[#1B2A35] bg-[#0B1721] px-3 sm:px-4 flex flex-col md:flex-row md:items-center justify-between gap-2.5 z-20 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#E05B5B] shrink-0">
             <Mountain className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-[#E8F0F3] leading-none">
+            <h1 className="text-xs sm:text-sm font-bold text-[#E8F0F3] leading-none">
               ICEBERG INTELLIGENCE & TRAJECTORY PREDICTION
             </h1>
-            <p className="text-[10px] text-[#91A4AE] mt-0.5">
+            <p className="text-[9px] sm:text-[10px] text-[#91A4AE] mt-0.5 truncate max-w-[280px] sm:max-w-none">
               NIC / Sentinel-1 SAR Tracking · Hydrodynamic drift modeling with uncertainty corridor
             </p>
           </div>
         </div>
 
         {/* 4 Header Key Metrics */}
-        <div className="flex items-center gap-4 lg:gap-8 text-xs">
-          <div className="text-left">
-            <span className="text-[10px] text-[#60737E] uppercase block leading-none">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-8 text-xs overflow-x-auto max-w-full pb-1 md:pb-0">
+          <div className="text-left shrink-0">
+            <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase block leading-none">
               ACTIVE ICEBERGS
             </span>
-            <span className="text-sm font-bold text-[#E8F0F3] mt-0.5 block">147</span>
+            <span className="text-xs sm:text-sm font-bold text-[#E8F0F3] mt-0.5 block">147</span>
           </div>
-          <div className="h-4 w-px bg-[#1B2A35]" />
-          <div className="text-left">
-            <span className="text-[10px] text-[#60737E] uppercase block leading-none">TRACKED</span>
-            <span className="text-sm font-bold text-[#5DADE2] mt-0.5 block">132</span>
+          <div className="h-4 w-px bg-[#1B2A35] shrink-0" />
+          <div className="text-left shrink-0">
+            <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase block leading-none">TRACKED</span>
+            <span className="text-xs sm:text-sm font-bold text-[#5DADE2] mt-0.5 block">132</span>
           </div>
-          <div className="h-4 w-px bg-[#1B2A35]" />
-          <div className="text-left">
-            <span className="text-[10px] text-[#60737E] uppercase block leading-none">
+          <div className="h-4 w-px bg-[#1B2A35] shrink-0" />
+          <div className="text-left shrink-0">
+            <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase block leading-none">
               HIGH RISK
             </span>
-            <span className="text-sm font-bold text-[#E05B5B] mt-0.5 block">8</span>
+            <span className="text-xs sm:text-sm font-bold text-[#E05B5B] mt-0.5 block">8</span>
           </div>
-          <div className="h-4 w-px bg-[#1B2A35]" />
-          <div className="text-left">
-            <span className="text-[10px] text-[#60737E] uppercase block leading-none">
-              ROUTE INTERSECTIONS
+          <div className="h-4 w-px bg-[#1B2A35] shrink-0" />
+          <div className="text-left shrink-0">
+            <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase block leading-none">
+              INTERSECTIONS
             </span>
-            <span className="text-sm font-bold text-[#E5B84B] mt-0.5 block">3</span>
+            <span className="text-xs sm:text-sm font-bold text-[#E5B84B] mt-0.5 block">3</span>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Tab Switcher (< lg screens) */}
+      <div className="lg:hidden flex items-center justify-between p-1.5 bg-[#0B1721] border-b border-[#1B2A35] shrink-0 text-xs">
+        <div className="flex items-center gap-1 w-full">
+          <button
+            onClick={() => setMobileTab('targets')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'targets'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <Mountain className="w-3.5 h-3.5" />
+            <span>Target Inspector ({filteredIcebergs.length})</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('map')}
+            className={`flex-1 py-1.5 px-2 rounded flex items-center justify-center gap-1.5 transition cursor-pointer font-semibold ${
+              mobileTab === 'map'
+                ? 'bg-[#152535] text-[#5DADE2] border border-[#5DADE2]/40'
+                : 'text-[#91A4AE] hover:text-[#E8F0F3]'
+            }`}
+          >
+            <span>Radar Map</span>
+          </button>
         </div>
       </div>
 
       {/* Main Screen: Left Inspector Panel + Center/Right GIS Map */}
       <div className="flex-1 flex flex-col lg:flex-row h-full overflow-hidden">
         {/* Left Side: Iceberg Details & Trajectory Inspector */}
-        <div className="w-full lg:w-96 border-r border-[#1B2A35] bg-[#071018] flex flex-col h-full overflow-y-auto shrink-0 text-xs">
+        <div
+          className={`w-full lg:w-96 border-r border-[#1B2A35] bg-[#071018] flex flex-col h-full overflow-y-auto shrink-0 text-xs ${
+            mobileTab === 'targets' ? 'flex' : 'hidden lg:flex'
+          }`}
+        >
           {/* Filter Pills */}
           <div className="p-3 border-b border-[#1B2A35] bg-[#0B1721]/50 flex items-center justify-between">
             <span className="text-[10px] text-[#60737E] uppercase font-semibold">TARGET FILTER:</span>
@@ -326,7 +359,7 @@ export const IcebergsView: React.FC<IcebergsViewProps> = ({
 
               <div className="flex gap-2 pt-2">
                 <button
-                  onClick={onNavigateToNavigationTab}
+                  onClick={() => setMobileTab('map')}
                   className="flex-1 py-1.5 px-2 rounded bg-[#0B1721] border border-[#1B2A35] hover:bg-[#152535] text-[#E8F0F3] text-xs font-bold transition text-center cursor-pointer"
                 >
                   VIEW ON MAP
@@ -344,7 +377,11 @@ export const IcebergsView: React.FC<IcebergsViewProps> = ({
         </div>
 
         {/* Right Side: Map Centered on Iceberg Field & Selected Trajectory */}
-        <div className="flex-1 h-full relative">
+        <div
+          className={`flex-1 h-full relative ${
+            mobileTab === 'map' ? 'block' : 'hidden lg:block'
+          }`}
+        >
           <AntarcticMap
             vessel={vessel}
             icebergs={icebergs}
@@ -360,6 +397,20 @@ export const IcebergsView: React.FC<IcebergsViewProps> = ({
             highlightIntersection={hasRouteIntersection}
             customClass="h-full w-full"
           />
+
+          {/* Mobile Top Target Pill */}
+          <div className="absolute top-2 left-2 right-16 sm:left-4 z-10 bg-[#0B1721]/95 backdrop-blur-md border border-[#1B2A35] rounded px-2.5 py-1.5 font-mono text-[11px] shadow-lg lg:hidden flex items-center justify-between">
+            <div className="truncate">
+              <span className="text-[#E05B5B] font-bold">{inspectedBerg.id}</span>
+              <span className="text-[#91A4AE] ml-1.5">{inspectedBerg.estimatedSizeKm} km · {inspectedBerg.headingDeg}°</span>
+            </div>
+            <button
+              onClick={() => setMobileTab('targets')}
+              className="text-[10px] text-[#5DADE2] hover:underline font-semibold ml-2 shrink-0 cursor-pointer"
+            >
+              List →
+            </button>
+          </div>
 
           {/* Floating Selected Iceberg Tag */}
           <div className="absolute top-4 left-60 z-10 bg-[#0B1721]/90 backdrop-blur-sm border border-[#1B2A35] rounded px-3 py-1.5 text-xs shadow-lg hidden md:block">

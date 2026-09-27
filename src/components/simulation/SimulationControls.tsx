@@ -25,21 +25,21 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   const isT12Encounter = simulation.timeStep >= 12 && !simulation.routeRecalculated;
 
   return (
-    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 w-full max-w-xl px-4 select-none font-mono">
-      <div className="bg-[#0B1721]/95 backdrop-blur-md border border-[#E5B84B]/40 rounded-lg shadow-2xl p-3 space-y-2.5 ring-1 ring-[#E5B84B]/20">
+    <div className="absolute top-14 sm:top-16 left-1/2 -translate-x-1/2 z-30 w-full max-w-xl px-2 sm:px-4 select-none font-mono">
+      <div className="bg-[#0B1721]/95 backdrop-blur-md border border-[#E5B84B]/40 rounded-lg shadow-2xl p-2.5 sm:p-3 space-y-2 sm:space-y-2.5 ring-1 ring-[#E5B84B]/20">
         {/* Top Control Bar */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#E5B84B] animate-pulse" />
-            <span className="text-xs font-bold text-[#E5B84B] uppercase tracking-wider">
-              SIMULATION MODE ACTIVE
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#E5B84B] animate-pulse shrink-0" />
+            <span className="text-[10px] sm:text-xs font-bold text-[#E5B84B] uppercase tracking-wider">
+              SIMULATION
             </span>
-            <span className="text-[10px] text-[#91A4AE]">
+            <span className="text-[9px] sm:text-[10px] text-[#91A4AE]">
               [T+{String(simulation.timeStep).padStart(2, '0')}h Horizon]
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={onTogglePlay}
               className="p-1 rounded bg-[#152535] hover:bg-[#1E3A4F] text-[#E8F0F3] transition cursor-pointer"
@@ -67,7 +67,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         </div>
 
         {/* Timeline Slider Buttons: T+00, T+06, T+12, T+18, T+24 */}
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
           {steps.map((st) => {
             const isCurrent = simulation.timeStep === st;
             const isHazardStep = st === 12;
@@ -76,7 +76,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               <button
                 key={st}
                 onClick={() => onStepChange(st)}
-                className={`py-1.5 px-2 rounded text-xs transition cursor-pointer font-bold relative flex flex-col items-center ${
+                className={`py-1 sm:py-1.5 px-1 sm:px-2 rounded text-[10px] sm:text-xs transition cursor-pointer font-bold relative flex flex-col items-center ${
                   isCurrent
                     ? 'bg-[#E5B84B] text-[#071018] shadow'
                     : 'bg-[#071018] border border-[#1B2A35] text-[#91A4AE] hover:text-[#E8F0F3] hover:border-[#E5B84B]/40'

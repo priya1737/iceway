@@ -25,31 +25,31 @@ export const WeatherOceanView: React.FC<WeatherOceanViewProps> = ({ weather, ves
   const currentStep = weather.timeline[selectedHorizon] || weather.timeline[0];
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-y-auto select-none bg-[#071018] p-4 lg:p-6 font-mono space-y-6">
+    <div className="flex-1 flex flex-col h-full overflow-y-auto select-none bg-[#071018] p-3 sm:p-4 lg:p-6 font-mono space-y-4 sm:space-y-6">
       {/* Header & Forecast Horizon Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1B2A35]">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-[#1B2A35]">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#152535] border border-[#1B2A35] flex items-center justify-center text-[#5DADE2] shrink-0">
             <Waves className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-[#E8F0F3]">
+            <h1 className="text-sm sm:text-base font-bold text-[#E8F0F3] leading-none">
               WEATHER & OCEANOGRAPHIC METEOROLOGY
             </h1>
-            <p className="text-[11px] text-[#91A4AE]">
+            <p className="text-[10px] sm:text-[11px] text-[#91A4AE] mt-0.5 truncate max-w-[280px] sm:max-w-none">
               ECMWF High-Resolution Polar Model + HYCOM Circumpolar Ocean Surface Velocity
             </p>
           </div>
         </div>
 
         {/* Timeline Horizon Buttons: NOW, +6H, +12H, +24H */}
-        <div className="flex items-center gap-1.5 p-1 bg-[#0B1721] border border-[#1B2A35] rounded">
-          <span className="text-[10px] text-[#60737E] uppercase px-2">HORIZON:</span>
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 bg-[#0B1721] border border-[#1B2A35] rounded overflow-x-auto max-w-full">
+          <span className="text-[9px] sm:text-[10px] text-[#60737E] uppercase px-1.5 shrink-0 hidden xs:inline">HORIZON:</span>
           {weather.timeline.map((step, idx) => (
             <button
               key={step.timeLabel}
               onClick={() => setSelectedHorizon(idx)}
-              className={`px-3 py-1 rounded text-xs transition cursor-pointer font-bold ${
+              className={`px-2.5 sm:px-3 py-1 rounded text-[11px] sm:text-xs transition cursor-pointer font-bold shrink-0 ${
                 selectedHorizon === idx
                   ? 'bg-[#5DADE2] text-[#071018]'
                   : 'text-[#91A4AE] hover:text-[#E8F0F3] hover:bg-[#152535]'

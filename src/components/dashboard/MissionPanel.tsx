@@ -46,7 +46,7 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
   const isEncounterAlert = simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated;
 
   return (
-    <div className="w-80 lg:w-88 border-l border-[#1B2A35] bg-[#071018] flex flex-col h-full select-none shrink-0 overflow-y-auto">
+    <div className="w-full lg:w-88 border-t lg:border-t-0 lg:border-l border-[#1B2A35] bg-[#071018] flex flex-col h-full select-none shrink-0 overflow-y-auto">
       {/* 1. Mission Header Card */}
       <div className="p-4 border-b border-[#1B2A35] bg-[#0B1721]/50">
         <div className="flex items-center justify-between mb-1.5">
