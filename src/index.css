@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #071018;
+    color: #E8F0F3;
+  }
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom scrollbars for operational panels */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #071018;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1B2A35;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3f4e;
+}
+
+/* Subtle pulse for radar / vessel / active markers without glowing neon */
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2.5s ease-in-out infinite;
+}
+
+/* Compass radar sweep simulation */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  transform-origin: center;
+  animation: radar-sweep 12s linear infinite;
+}
