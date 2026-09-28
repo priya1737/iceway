@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { AntarcticMap } from '../map/AntarcticMap';
 import { MissionPanel } from './MissionPanel';
 import { EnvironmentStrip } from './EnvironmentStrip';
@@ -61,10 +62,12 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   // Mobile sub-tab view switcher
   const [mobileTab, setMobileTab] = useState<'map' | 'mission' | 'conditions' | 'command'>('map');
 
-  // Compute risk score based on whether simulation is at T+12 with un-recalculated iceberg encounter
-  const isT12Hazard = simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated;
-  const currentRiskScore = isT12Hazard ? 67 : activeRoute.riskScore;
-  const currentRiskLevel = isT12Hazard ? 'HIGH' : currentRiskScore > 35 ? 'CAUTION' : 'LOW';
+  const { riskEvaluation, provenanceStatus, activeConflictAlerts } = useApp();
+
+  // Compute risk score dynamically from the centralized Spatial Risk Engine
+  const isT12Hazard = (simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated) || activeConflictAlerts.length > 0;
+  const currentRiskScore = riskEvaluation.overallRiskScore;
+  const currentRiskLevel = riskEvaluation.riskLevel;
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden select-none bg-[#071018] font-mono">
@@ -228,6 +231,8 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             onOpenIcebergsTab={onOpenIcebergsTab}
             onOpenVesselModal={onOpenVesselModal}
             selectedIceberg={selectedIceberg}
+            riskEvaluation={riskEvaluation}
+            provenanceStatus={provenanceStatus}
           />
         </div>
 

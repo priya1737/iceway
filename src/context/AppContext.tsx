@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import {
   Mission,
   Iceberg,
@@ -11,6 +11,11 @@ import {
   NavigationTab,
 } from '../types/navigation';
 import {
+  DataProvenanceStatus,
+  RouteConflictAlert,
+  DecisionAuditLogEntry,
+} from '../types/dataModels';
+import {
   INITIAL_VESSEL,
   RESEARCH_STATIONS,
   INITIAL_ICEBERGS,
@@ -22,6 +27,12 @@ import {
   INITIAL_WEATHER_OCEAN,
   MISSIONS_LIST,
 } from '../data/mockAntarcticData';
+import { simulationEngine } from '../services/simulationEngine';
+import { conflictDetectionService } from '../services/conflictDetection';
+import { spatialRiskEngine, RouteRiskEvaluation } from '../services/spatialRiskEngine';
+import { routeOptimizer } from '../services/routeOptimizer';
+import { auditLogService } from '../services/auditLogService';
+import { HISTORICAL_ICEBERG_OBSERVATIONS } from '../data/historicalIcebergs';
 
 export type AccentColor = 'cyan' | 'emerald' | 'violet' | 'amber';
 
@@ -239,6 +250,14 @@ interface AppContextType {
   confirmDialog: ConfirmDialogConfig | null;
   showConfirmDialog: (config: Omit<ConfirmDialogConfig, 'isOpen'>) => void;
   closeConfirmDialog: () => void;
+
+  // Decision Support Extensions
+  activeConflictAlerts: RouteConflictAlert[];
+  recalculatedRouteOption: RouteOption;
+  provenanceStatus: DataProvenanceStatus;
+  auditLogs: DecisionAuditLogEntry[];
+  riskEvaluation: RouteRiskEvaluation;
+  recalculateAvoidanceCorridor: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -309,6 +328,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     ROUTE_SAFETY_PRIORITY,
   ]);
   const [activeRoute, setActiveRoute] = useState<RouteOption>(ROUTE_BALANCED);
+
+  // Decision Support State & Engine Hooks
+  const [activeConflictAlerts, setActiveConflictAlerts] = useState<RouteConflictAlert[]>([]);
+  const [auditLogs, setAuditLogs] = useState<DecisionAuditLogEntry[]>(() => auditLogService.getLogs());
 
   // Environmental Data State
   const [seaIce, setSeaIce] = useState<SeaIceData>(INITIAL_SEA_ICE);
@@ -451,9 +474,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return () => clearInterval(timer);
   }, [simulation.active, simulation.isPlaying, seaIce.forecast]);
 
+  // Provenance Status: SIMULATION when simulation is active, HISTORICAL in baseline mode
+  const provenanceStatus: DataProvenanceStatus = simulation.active ? 'SIMULATION' : 'HISTORICAL';
+
+  // Dynamic Route Risk Evaluation from Spatial Risk Engine
+  const riskEvaluation = useMemo(() => {
+    return spatialRiskEngine.evaluateRouteRisk(
+      activeRoute,
+      HISTORICAL_ICEBERG_OBSERVATIONS,
+      vessel,
+      simulation.active ? simulation.timeStep : 0
+    );
+  }, [activeRoute, vessel, simulation.active, simulation.timeStep]);
+
+  // Recalculated Avoidance Option computed via A* Optimizer
+  const recalculatedRouteOption = useMemo(() => {
+    return routeOptimizer.calculateAvoidanceRoute(
+      { lat: vessel.lat, lon: vessel.lon },
+      { lat: -69.41, lon: 76.19 },
+      vessel,
+      HISTORICAL_ICEBERG_OBSERVATIONS,
+      HISTORICAL_ICEBERG_OBSERVATIONS[0]
+    );
+  }, [vessel]);
+
+  const recalculateAvoidanceCorridor = () => {
+    setRecalculateModalOpen(true);
+  };
+
   const handleToggleSimulation = () => {
     setSimulation((prev) => {
       const willBeActive = !prev.active;
+      const targetStep = willBeActive ? 12 : 0;
       if (willBeActive) {
         addToast('Simulation Mode Online', 'Temporal prediction engine loaded. Advancing to T+12h intercept.', 'warning');
       } else {
@@ -462,17 +514,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       return {
         ...prev,
         active: willBeActive,
-        timeStep: willBeActive ? 12 : 0,
+        timeStep: targetStep,
         isPlaying: false,
       };
     });
   };
 
   const handleSetSimulationStep = (step: 0 | 6 | 12 | 18 | 24) => {
+    const stepState = simulationEngine.computeStateAtStep(step, vessel, activeRoute);
     setSimulation((prev) => ({ ...prev, timeStep: step }));
-    const matchedForecast = seaIce.forecast.find((f) => f.tHours === step);
-    if (matchedForecast) {
-      setSeaIce((si) => ({ ...si, currentConcentrationPct: matchedForecast.concentrationPct }));
+    setSeaIce((si) => ({ ...si, currentConcentrationPct: stepState.meanSeaIceConcentrationPct }));
+    setActiveConflictAlerts(stepState.conflicts);
+
+    // If step has conflict and not dismissed/recalculated, trigger conflict alert
+    if (stepState.hasActiveConflict && !simulation.routeRecalculated) {
+      addToast(
+        'Route Conflict Detected: IB-1042',
+        `Predicted iceberg CPA of ${stepState.conflicts[0]?.closestApproachDistanceNm || 2.2} NM violates safety buffer. Dynamic recalculation advised.`,
+        'error',
+        6000
+      );
+      addActivityLog({
+        severity: 'critical',
+        source: 'RADAR',
+        message: `Route Conflict Detected: IB-1042 CPA ${stepState.conflicts[0]?.closestApproachDistanceNm || 2.2} NM.`,
+        details: 'Violates statutory safety clearance buffer of 3.0 NM per Polar Waters Operational Manual.',
+      });
     }
   };
 
@@ -490,25 +557,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setActiveRoute(ROUTE_BALANCED);
     setAvailableRoutes([ROUTE_BALANCED, ROUTE_FUEL_EFFICIENT, ROUTE_SAFETY_PRIORITY]);
     setSeaIce((si) => ({ ...si, currentConcentrationPct: 34 }));
+    setActiveConflictAlerts([]);
     addToast('Simulation Reset', 'Navigational parameters restored to T+00h baseline.', 'info');
   };
 
   const handleApplyRecalculatedRoute = () => {
-    const updatedRoutes = [
-      ROUTE_RECALCULATED_AVOIDANCE,
-      ROUTE_BALANCED,
-      ROUTE_FUEL_EFFICIENT,
-      ROUTE_SAFETY_PRIORITY,
-    ];
-    setAvailableRoutes(updatedRoutes);
-    setActiveRoute(ROUTE_RECALCULATED_AVOIDANCE);
+    const avoidance = recalculatedRouteOption;
+    setAvailableRoutes((prev) => [avoidance, ...prev.filter((r) => r.id !== avoidance.id)]);
+    setActiveRoute(avoidance);
     setSimulation((prev) => ({
       ...prev,
       routeRecalculated: true,
+      intersectionAlertDismissed: true,
     }));
+    setActiveConflictAlerts([]);
     addToast(
       'Avoidance Corridor Engaged',
-      'Route 07-R waypoint sequence loaded into autopilot. Clearance margin: 4.8 NM.',
+      'Route 01-MOD waypoint sequence loaded into autopilot. Clearance margin: 4.8 NM.',
       'success',
       5000
     );
@@ -516,8 +581,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       severity: 'success',
       source: 'AUTOPILOT',
       message: 'Dynamic Route Recalculation applied: Avoidance Corridor engaged.',
-      details: 'Iceberg B-31 CPA increased from 0.8 NM to 4.8 NM.',
+      details: 'Iceberg IB-1042 CPA increased from 2.2 NM to 4.8 NM (POLARIS safety margin restored).',
     });
+    setAuditLogs(auditLogService.getLogs());
   };
 
   // Missions CRUD
@@ -841,6 +907,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setSettingsOpen,
         recalculateModalOpen,
         setRecalculateModalOpen,
+        activeConflictAlerts,
+        recalculatedRouteOption,
+        provenanceStatus,
+        auditLogs,
+        riskEvaluation,
+        recalculateAvoidanceCorridor,
         toasts,
         addToast,
         removeToast,

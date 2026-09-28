@@ -169,8 +169,8 @@ export const INITIAL_ICEBERGS: Iceberg[] = [
   {
     id: 'IB-1042',
     name: 'Iceberg IB-1042',
-    lat: -66.38,
-    lon: 66.85,
+    lat: -66.18,
+    lon: 66.75,
     estimatedSizeKm: 1.8,
     velocityMs: 0.42,
     headingDeg: 218,

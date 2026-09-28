@@ -1,0 +1,81 @@
+import { DatasetMetadata } from '../types/dataModels';
+
+export const DATASET_METADATA_REGISTRY: Record<string, DatasetMetadata> = {
+  seaIceSAR: {
+    source: 'Copernicus Sentinel-1C C-Band SAR (Dual-Pol HH+HV Extra Wide Swath)',
+    sourceOrganization: 'European Space Agency (ESA) / Copernicus Marine Service',
+    retrievedAt: '2026-03-24T06:15:00Z',
+    observationTime: '2026-03-24T04:22:18Z',
+    spatialResolution: '40m pixel spacing (resampled to 0.25° grid)',
+    temporalResolution: 'Daily repeat pass',
+    license: 'Copernicus Open Access / CC BY 4.0',
+    status: 'PROCESSED',
+    modelVersion: 'ICEWAY-SAR-Classifier v2.4 (Sigma-0 Dual-Pol Inversion)',
+    notes: 'Calibrated backscatter for Prydz Bay and Amery Ice Shelf coastal polynya.',
+  },
+
+  icebergsNIC: {
+    source: 'National Ice Center (US NIC) & Antarctic Iceberg Tracking Database (BYU/NASA)',
+    sourceOrganization: 'U.S. National Ice Center / NOAA / US Navy / USCG',
+    retrievedAt: '2026-03-24T08:00:00Z',
+    observationTime: '2026-03-24T07:15:00Z',
+    spatialResolution: 'Identified targets > 0.5 km length',
+    temporalResolution: '12-hour bulletin',
+    license: 'Public Domain / Open Data NOAA',
+    status: 'HISTORICAL',
+    modelVersion: 'NIC Southern Ocean Bulletin Q1-2026',
+    notes: 'Cross-correlated with shipboard X-band marine radar telemetry from RV Sagar.',
+  },
+
+  weatherECMWF: {
+    source: 'ECMWF Integrated Forecasting System (IFS) / Copernicus Atmosphere Service',
+    sourceOrganization: 'European Centre for Medium-Range Weather Forecasts',
+    retrievedAt: '2026-03-24T06:00:00Z',
+    observationTime: '2026-03-24T00:00:00Z',
+    spatialResolution: '0.1° (~9 km)',
+    temporalResolution: '3-hour forecast steps',
+    license: 'Copernicus Climate Change Service Open Data',
+    status: 'HISTORICAL',
+    modelVersion: 'IFS Cycle 49r1 Global Ocean-Atmosphere Model',
+    notes: 'Wind stress, 2m air temperature, mean sea level pressure, and structural icing index.',
+  },
+
+  oceanCurrentsHYCOM: {
+    source: 'Global Ocean Data Assimilation Experiment / HYCOM + NCODA Global Analysis',
+    sourceOrganization: 'Naval Research Laboratory / NOAA',
+    retrievedAt: '2026-03-24T04:00:00Z',
+    observationTime: '2026-03-24T00:00:00Z',
+    spatialResolution: '1/12° (~8 km)',
+    temporalResolution: 'Daily analysis',
+    license: 'Open Access Research License',
+    status: 'PROCESSED',
+    modelVersion: 'HYCOM GLBv0.08 Experiment 93.0',
+    notes: 'Surface to 250m depth baroclinic current vectors for Antarctic Coastal Current.',
+  },
+
+  bathymetryGEBCO: {
+    source: 'GEBCO_2025 Grid (General Bathymetric Chart of the Oceans)',
+    sourceOrganization: 'IHO-IOC GEBCO Guiding Committee / Nippon Foundation-GEBCO Seabed 2030',
+    retrievedAt: '2026-01-15T00:00:00Z',
+    observationTime: '2025-12-01T00:00:00Z',
+    spatialResolution: '15 arc-second (~450m)',
+    temporalResolution: 'Annual compilation',
+    license: 'GEBCO Open Sub-license',
+    status: 'HISTORICAL',
+    modelVersion: 'GEBCO 2025 Continental Margin Release',
+    notes: 'Prydz Bay trough depth sounding; validates iceberg grounding thresholds.',
+  },
+
+  simulationScenario: {
+    source: 'ICEWAY Demonstration Scenario: RV Sagar to Bharati Transit',
+    sourceOrganization: 'National Centre for Polar and Ocean Research (NCPOR)',
+    retrievedAt: '2026-03-24T12:00:00Z',
+    observationTime: '2026-03-24T12:00:00Z',
+    spatialResolution: 'Deterministic 0.25° Spatial Grid',
+    temporalResolution: '6-hour time steps (T+00 to T+24)',
+    license: 'Operational Decision-Support System Internal Use',
+    status: 'SIMULATION',
+    modelVersion: 'ICEWAY Decision Engine v4.2',
+    notes: 'Demonstrates deterministic IB-1042 conflict interception and A* dynamic recalculation.',
+  },
+};

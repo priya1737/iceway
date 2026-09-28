@@ -28,6 +28,9 @@ import {
 import { MapControls } from './MapControls';
 import { LayerControl } from './LayerControl';
 import { Ship, Mountain, AlertTriangle, Info, MapPin } from 'lucide-react';
+import { seaIceForecastEngine } from '../../services/seaIceForecastEngine';
+import { monteCarloTrajectoryEngine } from '../../services/monteCarloTrajectory';
+import { HISTORICAL_ICEBERG_OBSERVATIONS } from '../../data/historicalIcebergs';
 
 interface AntarcticMapProps {
   vessel: Vessel;
@@ -345,6 +348,22 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
     return projectLatLon(-66.50, 66.80);
   }, []);
 
+  // Scientific Sea-Ice Spatial Grid computed from Physics-Advection Engine
+  const spatialSeaIceGrid = useMemo(() => {
+    return seaIceForecastEngine.getForecastGrid(simulation.active ? simulation.timeStep : 0);
+  }, [simulation.active, simulation.timeStep]);
+
+  // Iceberg Observation for Monte Carlo Trajectory Ensemble
+  const targetObsBerg = useMemo(() => {
+    const selectedId = selectedIceberg?.id || (highlightIntersection ? 'IB-1042' : 'IB-1042');
+    return HISTORICAL_ICEBERG_OBSERVATIONS.find((b) => b.id === selectedId) || HISTORICAL_ICEBERG_OBSERVATIONS[0];
+  }, [selectedIceberg, highlightIntersection]);
+
+  const icebergEnsemble = useMemo(() => {
+    if (!targetObsBerg) return null;
+    return monteCarloTrajectoryEngine.generateEnsemble(targetObsBerg, 40, 1042);
+  }, [targetObsBerg]);
+
   return (
     <div
       ref={containerRef}
@@ -551,28 +570,48 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
           </g>
         )}
 
-        {/* 2. Sea-Ice Concentration Extent (Dynamic based on percentage) */}
+        {/* 2. Sea-Ice Concentration Extent (Empirical Advection Grid) */}
         {layers.seaIce && (
           <g className="sea-ice-layer">
-            {/* Marginal Ice Zone (10-35% concentration) */}
+            {/* Background Marginal Ice Zone */}
             <path
               d="M 220 380 Q 420 340 680 390 T 1050 480 L 1050 780 L 220 780 Z"
               fill="#A0D2EB"
-              fillOpacity={0.08 + (seaIceConcentrationPct / 100) * 0.08}
-            />
-            {/* Medium Pack Ice Zone (35-65% concentration) */}
-            <path
-              d="M 310 460 Q 520 420 760 480 T 1000 580 L 1000 780 L 310 780 Z"
-              fill="#5DADE2"
-              fillOpacity={0.12 + (seaIceConcentrationPct / 100) * 0.12}
-            />
-            {/* Consolidated Fast Ice & Amery Inflow (>65% concentration) */}
-            <path
-              d="M 430 540 Q 610 520 830 570 T 960 670 L 960 780 L 430 780 Z"
-              fill="url(#packIcePattern)"
+              fillOpacity={0.06 + (seaIceConcentrationPct / 100) * 0.06}
             />
 
-            {/* Sea Ice Lead Annotation */}
+            {/* Individual Spatial Grid Cells (Sentinel-1 SAR 0.5° Resolution) */}
+            <g className="spatial-sea-ice-grid">
+              {spatialSeaIceGrid.cells.map((cell) => {
+                if (cell.concentrationPct < 8) return null;
+                const pt = projectLatLon(cell.lat, cell.lon);
+                const size = 16;
+                const isHeavy = cell.concentrationPct >= 65;
+                const isMedium = cell.concentrationPct >= 35 && cell.concentrationPct < 65;
+
+                return (
+                  <rect
+                    key={cell.id}
+                    x={pt.x - size / 2}
+                    y={pt.y - size / 2}
+                    width={size}
+                    height={size}
+                    rx="1.5"
+                    fill={isHeavy ? '#5DADE2' : isMedium ? '#38BDF8' : '#A0D2EB'}
+                    fillOpacity={0.08 + (cell.concentrationPct / 100) * 0.35}
+                    stroke="#5DADE2"
+                    strokeWidth="0.5"
+                    strokeOpacity={cell.concentrationPct > 45 ? 0.3 : 0.1}
+                  >
+                    <title>
+                      {`Grid [${cell.lat}°S, ${cell.lon}°E] Concentration: ${cell.concentrationPct}% (${cell.stageOfDevelopment}) Thickness: ${cell.thicknessMeters}m Pressure: ${cell.compressionMpa} MPa`}
+                    </title>
+                  </rect>
+                );
+              })}
+            </g>
+
+            {/* Sea Ice Field Telemetry Annotation */}
             <text
               x="620"
               y="450"
@@ -580,9 +619,9 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
               fontSize="9"
               fontFamily="IBM Plex Mono, monospace"
               letterSpacing="2"
-              opacity="0.6"
+              opacity="0.75"
             >
-              PACK ICE FIELD · CONC: {seaIceConcentrationPct}%
+              SENTINEL-1C SAR GRID · MEAN CONC: {seaIceConcentrationPct}%
             </text>
           </g>
         )}
@@ -883,6 +922,39 @@ export const AntarcticMap: React.FC<AntarcticMapProps> = ({
                     strokeWidth="1.5"
                     strokeDasharray="4 2"
                   />
+
+                  {/* Monte Carlo 80% Confidence Ellipses */}
+                  {icebergEnsemble &&
+                    icebergEnsemble.confidenceEllipses80Pct.map((el, eIdx) => {
+                      if (el.tHours === 0) return null;
+                      const center = projectLatLon(el.centerLat, el.centerLon);
+                      return (
+                        <g key={`ellipse-${eIdx}`}>
+                          <ellipse
+                            cx={center.x}
+                            cy={center.y}
+                            rx={el.semiMajorAxisKm * 1.5}
+                            ry={el.semiMinorAxisKm * 1.5}
+                            transform={`rotate(${el.orientationDeg}, ${center.x}, ${center.y})`}
+                            fill="#E05B5B"
+                            fillOpacity="0.14"
+                            stroke="#E05B5B"
+                            strokeWidth="1.2"
+                            strokeDasharray="3 2"
+                          />
+                          <text
+                            x={center.x + el.semiMajorAxisKm * 1.5 + 4}
+                            y={center.y + 3}
+                            fill="#E05B5B"
+                            fontSize="7.5"
+                            fontFamily="IBM Plex Mono, monospace"
+                            opacity="0.85"
+                          >
+                            {`80% @ T+${el.tHours}h`}
+                          </text>
+                        </g>
+                      );
+                    })}
 
                   {/* Trajectory Time Steps */}
                   {trajPoints.map((p, idx) => (

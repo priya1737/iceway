@@ -17,6 +17,8 @@ import {
   Layers,
 } from 'lucide-react';
 import { Vessel, Mission, RouteOption, Iceberg, SimulationState } from '../../types/navigation';
+import { RouteRiskEvaluation } from '../../services/spatialRiskEngine';
+import { DataProvenanceStatus } from '../../types/dataModels';
 import { CommandCenterFeed } from './CommandCenterFeed';
 
 interface MissionPanelProps {
@@ -31,6 +33,8 @@ interface MissionPanelProps {
   onOpenIcebergsTab: () => void;
   onOpenVesselModal: () => void;
   selectedIceberg: Iceberg | null;
+  riskEvaluation?: RouteRiskEvaluation;
+  provenanceStatus?: DataProvenanceStatus;
 }
 
 export const MissionPanel: React.FC<MissionPanelProps> = ({
@@ -45,6 +49,8 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
   onOpenIcebergsTab,
   onOpenVesselModal,
   selectedIceberg,
+  riskEvaluation,
+  provenanceStatus = 'HISTORICAL',
 }) => {
   const isEncounterAlert = simulation.active && simulation.timeStep >= 12 && !simulation.routeRecalculated;
   const [panelTab, setPanelTab] = useState<'mission' | 'command'>('mission');
@@ -203,6 +209,38 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
               </div>
             </div>
 
+            {/* Calculated Risk Factor Breakdown */}
+            {riskEvaluation && (
+              <div className="mt-3 pt-3 border-t border-[#1B2A35] space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] text-[#60737E] uppercase font-bold">
+                  <span>Primary Risk Contributors</span>
+                  <span className="text-cyan-400 font-normal">{provenanceStatus}</span>
+                </div>
+                <div className="space-y-1 text-[11px]">
+                  <div className="flex items-center justify-between text-[#CBD5E1]">
+                    <span>Iceberg exposure:</span>
+                    <span className="font-bold text-[#E8F0F3]">{riskEvaluation.factorBreakdown.icebergExposurePct}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#CBD5E1]">
+                    <span>Sea-ice concentration:</span>
+                    <span className="font-bold text-[#E8F0F3]">{riskEvaluation.factorBreakdown.seaIceConcentrationPct}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#CBD5E1]">
+                    <span>Wave conditions:</span>
+                    <span className="font-bold text-[#E8F0F3]">{riskEvaluation.factorBreakdown.waveConditionsPct}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#CBD5E1]">
+                    <span>Wind stress:</span>
+                    <span className="font-bold text-[#E8F0F3]">{riskEvaluation.factorBreakdown.windForcingPct}%</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[#CBD5E1]">
+                    <span>Visibility restriction:</span>
+                    <span className="font-bold text-[#E8F0F3]">{riskEvaluation.factorBreakdown.visibilityPenaltyPct}%</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Route Exposure Metrics */}
             <div className="mt-3.5 pt-3 border-t border-[#1B2A35] grid grid-cols-2 gap-2 text-xs">
               <div>
@@ -216,22 +254,21 @@ export const MissionPanel: React.FC<MissionPanelProps> = ({
             </div>
           </div>
 
-          {/* 3. Proximity Alert Banner (Triggered during T+12 encounter with IB-1042) */}
+          {/* 3. Proximity Alert Banner (Triggered during encounter with IB-1042) */}
           {isEncounterAlert && (
             <div className="p-4 bg-[#E05B5B]/10 border-b border-[#E05B5B]/40 animate-soft-pulse">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-[#E05B5B] shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <div className="text-xs font-bold text-[#E05B5B]">
-                    ROUTE INTERSECTION ALERT
+                    ROUTE CONFLICT ALERT (IB-1042)
                   </div>
                   <p className="text-[11px] text-[#E8F0F3] leading-snug">
-                    Iceberg <strong className="text-[#E05B5B]">IB-1042</strong> is projected to approach
-                    the active route at T+12.
+                    Iceberg <strong className="text-[#E05B5B]">IB-1042</strong> predicted CPA of <strong>2.2 NM</strong> violates statutory clearance limit (3.0 NM).
                   </p>
                   <div className="text-[10px] text-[#91A4AE] pt-0.5">
-                    Separation: <span className="text-[#E05B5B] font-bold">2.8 NM</span> · Condition:{' '}
-                    <span className="text-[#E5B84B] font-bold">CAUTION</span>
+                    Separation: <span className="text-[#E05B5B] font-bold">2.2 NM</span> · Time to CPA:{' '}
+                    <span className="text-[#E5B84B] font-bold">10h 14m</span>
                   </div>
                 </div>
               </div>

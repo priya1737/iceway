@@ -68,6 +68,8 @@ function AppContent() {
     setRecalculateModalOpen,
     settings,
     updateSettings,
+    recalculatedRouteOption,
+    activeConflictAlerts,
   } = useApp();
 
   return (
@@ -230,6 +232,11 @@ function AppContent() {
         isOpen={recalculateModalOpen}
         onClose={() => setRecalculateModalOpen(false)}
         onApplyRecalculatedRoute={handleApplyRecalculatedRoute}
+        onModifyRoute={() => setActiveTab('navigation')}
+        activeRoute={activeRoute}
+        recalculatedRoute={recalculatedRouteOption}
+        vessel={vessel}
+        activeConflict={activeConflictAlerts[0] || null}
       />
 
       <NewMissionModal />
