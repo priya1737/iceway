@@ -50,47 +50,6 @@ export const LandingPageView: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#060b11] text-[#E8F0F3] overflow-y-auto select-none font-sans scroll-smooth">
-      {/* 1. Top Portal Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#071018]/90 backdrop-blur-md border-b border-[#1B2A35] px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#0B1721] border border-cyan-500/30 flex items-center justify-center text-cyan-400 font-mono font-bold text-sm shadow-inner">
-            <svg viewBox="0 0 32 32" className="w-5 h-5" fill="none">
-              <polygon points="2,28 14,24 22,27 30,22 30,30 2,30" fill="#203a4c" />
-              <polyline points="2,28 14,24 22,27 30,22" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M4 8 L13 14 L22 11 L28 19" stroke="#34d399" strokeWidth="1.75" strokeLinecap="round" strokeDasharray="2 1.5" />
-              <circle cx="28" cy="19" r="2.2" fill="#38bdf8" />
-              <circle cx="4" cy="8" r="1.8" fill="#34d399" />
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold tracking-wider text-sm sm:text-base text-[#E8F0F3]">
-                ICEWAY
-              </span>
-              <span className="text-[11px] text-[#60737E] font-mono">/</span>
-              <span className="text-xs text-[#91A4AE] font-mono">POLAR MARITIME SYSTEM</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 text-xs text-[#91A4AE] font-mono mr-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>NCPOR BRIDGE READY</span>
-            <span className="text-[#60737E]">·</span>
-            <span>EAST ANTARCTICA</span>
-          </div>
-
-          <button
-            onClick={() => setActiveTab('overview')}
-            className="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-[#071018] font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 cursor-pointer"
-          >
-            <span>Launch Bridge Console</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </header>
-
       {/* 2. Hero Section: Cinematic Polar Maritime Command Showcase */}
       <section className="relative px-4 sm:px-8 py-10 lg:py-16 max-w-7xl mx-auto w-full">
         {/* Ambient atmospheric backdrop glows */}
