@@ -134,3 +134,95 @@
   animation: shimmer 1.8s infinite;
 }
 
+/* Leaflet Map Bridge Console Overrides */
+.leaflet-container {
+  background-color: #060b11 !important;
+  font-family: var(--font-mono) !important;
+  outline: none;
+}
+
+.leaflet-popup-content-wrapper {
+  background: rgba(11, 23, 33, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  border-radius: 8px !important;
+  color: #E8F0F3 !important;
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(56, 189, 248, 0.18) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: rgba(11, 23, 33, 0.95) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+.leaflet-popup-close-button {
+  color: #91A4AE !important;
+  padding: 6px !important;
+}
+.leaflet-popup-close-button:hover {
+  color: #38bdf8 !important;
+}
+
+.leaflet-tooltip {
+  background: rgba(7, 16, 24, 0.94) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  color: #E8F0F3 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: rgba(7, 16, 24, 0.94) !important;
+}
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: rgba(7, 16, 24, 0.94) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(6, 11, 17, 0.8) !important;
+  color: #718290 !important;
+  font-size: 10px !important;
+  backdrop-filter: blur(4px);
+  border-top-left-radius: 4px;
+}
+.leaflet-control-attribution a {
+  color: #38bdf8 !important;
+}
+
+/* Pulsing radar ping */
+@keyframes radar-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.animate-radar-ping {
+  animation: radar-ping 2.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+/* Flow dash for route polyline */
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-route-flow {
+  animation: dash-flow 2s linear infinite;
+}
+
